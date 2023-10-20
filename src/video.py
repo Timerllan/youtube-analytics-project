@@ -1,11 +1,12 @@
 from src.you_tube_base import YouTubeBase
+import isodate
 
 
 class Video(YouTubeBase):
 
     def __init__(self, id_video):
         self.__id_video = id_video
-        self.__data = self._youtube.videos().list(id=id_video, part='snippet,statistics').execute()
+        self.__data = self._youtube.videos().list(id=id_video, part='snippet,statistics,contentDetails').execute()
 
     @property
     def title(self):
@@ -26,6 +27,10 @@ class Video(YouTubeBase):
     @property
     def like(self):
         return int(self.__data['items'][0]['statistics']['likeCount'])
+
+    @property
+    def duration(self):
+        return isodate.parse_duration(self.__data['items'][0]['contentDetails']['duration'])
 
     def __str__(self):
         return self.title
