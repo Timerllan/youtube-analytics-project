@@ -5,35 +5,50 @@ import isodate
 class Video(YouTubeBase):
 
     def __init__(self, id_video):
+        try:
+            self.__data = self._youtube.videos().list(id=id_video, part='snippet,statistics,contentDetails').execute()
+            if self.__data['pageInfo']['totalResults'] == 0:
+                raise Exception
+
+        except Exception as e:
+            self.__data = None
+
         self.__id_video = id_video
-        self.__data = self._youtube.videos().list(id=id_video, part='snippet,statistics,contentDetails').execute()
 
     @property
     def title(self):
-        return self.__data['items'][0]["snippet"]["title"]
+        if self.__data:
+            return self.__data['items'][0]["snippet"]["title"]
+        return None
 
     @property
     def url(self):
-        return f"https://www.youtube.com/watch?v={self.__id_video}"
+        if self.__data:
+            return f"https://www.youtube.com/watch?v={self.__id_video}"
 
     @property
     def id_video(self):
-        return self.__id_video
+        if self.__data:
+            return self.__id_video
 
     @property
     def count_video(self):
-        return int(self.__data['items'][0]['statistics']['viewCount'])
+        if self.__data:
+            return int(self.__data['items'][0]['statistics']['viewCount'])
 
     @property
-    def like(self):
-        return int(self.__data['items'][0]['statistics']['likeCount'])
+    def like_count(self):
+        if self.__data:
+            return int(self.__data['items'][0]['statistics']['likeCount'])
 
     @property
     def duration(self):
-        return isodate.parse_duration(self.__data['items'][0]['contentDetails']['duration'])
+        if self.__data:
+            return isodate.parse_duration(self.__data['items'][0]['contentDetails']['duration'])
 
     def __str__(self):
-        return self.title
+        if self.__data:
+            return self.title
 
 
 class PLVideo(Video):
